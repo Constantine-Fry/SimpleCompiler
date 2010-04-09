@@ -1,9 +1,8 @@
 #define LEXSIZ	31	/* size of lexeme/identifier;
 only first 31 characters are considered */
 
-char NextSym(void);
-void PrevSym(void);
-int get_num(void);
+
+int GetNumber(unsigned char** num);
 int GetLexemeType(unsigned  char* lexeme);
 void SkipComment(unsigned char** comments);
 int GetCodeOperation(unsigned char** operation);
@@ -14,6 +13,7 @@ int lex(void);
 #include <string.h>
 
 #include "lexems.h"
+#include "TokenList.h"
 
 /* char llbuf[BUFSIZ];	*/
 unsigned char lllexeme[LEXSIZ+1];	/* +1 for '\0' */
@@ -66,8 +66,11 @@ int main (int argc, const char * argv[])
 		if (-1 == id) {
 			break;
 		}
+		Append(id,lllexeme);
 		printf("Token = %s, value = %d\n", lllexeme, id);
-	} 
+	}
+	Display();
+	Flush();
 	free(gSourceTxt);
 	printf("\nEND\n");
     return 0;
@@ -90,8 +93,9 @@ int lex(void)
 				yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
 				return GetLexemeType(lllexeme);
 				break;
+				
 			case DIGIT:
-				return get_num();
+				return GetNumber(&gPointToSourceTxt);
 				break;
 				
 			case ETX://конец текста
@@ -116,16 +120,6 @@ int lex(void)
 		gPointToSourceTxt++;
 		//sym1 = NextSym();
 	}
-}
-
-char NextSym(void)
-{
-	return (char) *(++gPointToSourceTxt);
-}
-
-void PrevSym(void)
-{
-    --gPointToSourceTxt;
 }
 
 void SkipComment(unsigned char** comments)
@@ -211,22 +205,24 @@ int GetCodeOperation(unsigned char** operation)
 		(*operation)++;
 		return END_OP;
 	}
+	return -2;
 }
 
 int GetLexemeType(unsigned char* lexeme)
 {
 	int i;
 	for (i = 0; gKeywords[i] != '\0'; i++)
-		if (strcmp(gKeywords[i], lexeme) == 0)
+		if (strcmp(gKeywords[i], (const char*)lexeme) == 0)
 			return KEYWORD;
 	return IDENTIFIER;
 }
 
-int get_num(void)
+int GetNumber(unsigned char** num)
 {
-	char c;
-	PrevSym();
-	while (gCharMap[(c = NextSym())] == DIGIT)
-		*yytext++ = c;
+	//char c;
+	(*num)--;
+	while (gCharMap[ *(++(*num))] == DIGIT)
+		*yytext++ = **num;
 	*yytext = '\0';
+	return NUMBER;
 }

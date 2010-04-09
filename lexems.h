@@ -34,7 +34,8 @@ enum {
 	MOV_OP,//=
 	END_OP,//;
 	IDENTIFIER,
-	KEYWORD
+	KEYWORD,
+	NUMBER
 };
 
 //Ключевые слова
