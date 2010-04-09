@@ -32,6 +32,7 @@ enum {
 	DIV_OP,// /
 	ADD_OP,//+
 	MOV_OP,//=
+	END_OP,//;
 	IDENTIFIER,
 	KEYWORD
 };

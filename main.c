@@ -5,7 +5,8 @@ char NextSym(void);
 void PrevSym(void);
 int get_num(void);
 int GetLexemeType(unsigned  char* lexeme);
-void Comment();
+void SkipComment(unsigned char** comments);
+int GetCodeOperation(unsigned char** operation);
 int lex(void);
 
 #include <stdio.h>
@@ -87,7 +88,6 @@ int lex(void)
 				
 				*yytext = '\0';		/* identifier < 32 characters */
 				yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
-				//PrevSym();	/* push back nonalnum char or '_' */
 				return GetLexemeType(lllexeme);
 				break;
 			case DIGIT:
@@ -102,67 +102,11 @@ int lex(void)
 				*yytext = '\0';
 				if (gPointToSourceTxt[0] == '/' &&
 					gPointToSourceTxt[1] == '*') {
-					Comment();
+					SkipComment(&gPointToSourceTxt);
 					break;
 				}
-
-				if (gPointToSourceTxt[0] == '>' &&
-					gPointToSourceTxt[1] == '=') {
-					//>=
-					gPointToSourceTxt++;
-					return GE_OP;
-				}
-				if (gPointToSourceTxt[0] == '<' &&
-					gPointToSourceTxt[1] == '=') {
-					//<=
-					gPointToSourceTxt++;
-					return LE_OP;
-				}
-				if (gPointToSourceTxt[0] == '!' &&
-					gPointToSourceTxt[1] == '=') {
-					//!=
-					gPointToSourceTxt++;
-					return NE_OP;
-				}
-				if (gPointToSourceTxt[0] == '+' &&
-					gPointToSourceTxt[1] == '+') {
-					//++
-					gPointToSourceTxt++;
-					return INC_OP;
-				}
-
-				if (gPointToSourceTxt[0] == '-' &&
-					gPointToSourceTxt[1] == '-') {
-					//--
-					gPointToSourceTxt++;
-					return DEC_OP;
-				}
+				return GetCodeOperation(&gPointToSourceTxt);
 				
-				if (gPointToSourceTxt[0] == '-') {
-					// -
-					gPointToSourceTxt++;
-					return SUB_OP;
-				}
-				if (gPointToSourceTxt[0] == '+') {
-					// +
-					gPointToSourceTxt++;
-					return ADD_OP;
-				}
-				if (gPointToSourceTxt[0] == '*') {
-					// *
-					gPointToSourceTxt++;
-					return MUL_OP;
-				}
-				if (gPointToSourceTxt[0] == '/') {
-					// /
-					gPointToSourceTxt++;
-					return DIV_OP;
-				}
-				if (gPointToSourceTxt[0] == '=') {
-					// =
-					gPointToSourceTxt++;
-					return MOV_OP;
-				}
 				
 				break;
 				
@@ -184,20 +128,88 @@ void PrevSym(void)
     --gPointToSourceTxt;
 }
 
-void Comment(void)
+void SkipComment(unsigned char** comments)
 {
 	char sym1, sym2;
-	sym2 = NextSym();
+	sym2 = *((*comments)++);
 	while (1)
 	{
 		sym1 = sym2;
 		if (sym1 == EOF)
 			break;
-		sym2 = NextSym();
+		sym2 = *((*comments)++);
 		if ((sym1 == '*') && (sym2 == '/'))
 		{
+			(*comments)--;
 			break;
 		}           
+	}
+}
+
+int GetCodeOperation(unsigned char** operation)
+{
+	unsigned char *pointToSourceTxt = *operation;
+	if (pointToSourceTxt[0] == '>' &&
+		pointToSourceTxt[1] == '=') {
+		//>=
+		(*operation)++;
+		return GE_OP;
+	}
+	if (pointToSourceTxt[0] == '<' &&
+		pointToSourceTxt[1] == '=') {
+		//<=
+		(*operation)++;
+		return LE_OP;
+	}
+	if (pointToSourceTxt[0] == '!' &&
+		pointToSourceTxt[1] == '=') {
+		//!=
+		(*operation)++;
+		return NE_OP;
+	}
+	if (pointToSourceTxt[0] == '+' &&
+		pointToSourceTxt[1] == '+') {
+		//++
+		(*operation)++;
+		return INC_OP;
+	}
+	
+	if (pointToSourceTxt[0] == '-' &&
+		pointToSourceTxt[1] == '-') {
+		//--
+		(*operation)++;
+		return DEC_OP;
+	}
+	
+	if (pointToSourceTxt[0] == '-') {
+		// -
+		(*operation)++;
+		return SUB_OP;
+	}
+	if (pointToSourceTxt[0] == '+') {
+		// +
+		(*operation)++;
+		return ADD_OP;
+	}
+	if (pointToSourceTxt[0] == '*') {
+		// *
+		(*operation)++;
+		return MUL_OP;
+	}
+	if (pointToSourceTxt[0] == '/') {
+		// /
+		(*operation)++;
+		return DIV_OP;
+	}
+	if (pointToSourceTxt[0] == '=') {
+		// =
+		(*operation)++;
+		return MOV_OP;
+	}
+	if (pointToSourceTxt[0] == ';') {
+		// ;
+		(*operation)++;
+		return END_OP;
 	}
 }
 
