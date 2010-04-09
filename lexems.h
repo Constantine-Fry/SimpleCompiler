@@ -7,27 +7,31 @@
 
 //Лексемы
 enum {
-	RIGHT_ASSIGN=10,
-	LEFT_ASSIGN,
-	ADD_ASSIGN,
-	SUB_ASSIGN,
-	MUL_ASSIGN,
-	DIV_ASSIGN,
-	MOD_ASSIGN,
-	AND_ASSIGN,
-	XOR_ASSIGN,
-	OR_ASSIGN,
-	RIGHT_OP,
-	LEFT_OP,
-	INC_OP,
-	DEC_OP,
-	AND_OP,
-	OR_OP,
-	LE_OP,
-	GE_OP,
-	EQ_OP,
-	NE_OP,
-	
+//	RIGHT_ASSIGN=10,
+//	LEFT_ASSIGN,
+//	ADD_ASSIGN,
+//	SUB_ASSIGN,
+//	MUL_ASSIGN,
+//	DIV_ASSIGN,
+//	MOD_ASSIGN,
+//	AND_ASSIGN,
+//	XOR_ASSIGN,
+//	OR_ASSIGN,
+//	RIGHT_OP,
+//	LEFT_OP,
+	INC_OP = 10,//++
+	DEC_OP,//--
+	AND_OP,//&
+	OR_OP,//||
+	LE_OP,//
+	GE_OP,//>=
+	EQ_OP,//==
+	NE_OP,//<=
+	MUL_OP,//*
+	SUB_OP,//-
+	DIV_OP,// /
+	ADD_OP,//+
+	MOV_OP,//=
 	IDENTIFIER,
 	KEYWORD
 };
@@ -43,13 +47,14 @@ char *gKeywords[] = { "break", "case", "char", "do", "else", "for",
 #define LETTER 4
 #define DIGIT 8
 #define OTHER 16
+#define ETX 3 //конец текста
 
 //Мапа соответсвий символов и их типов
 static int gCharMap[256] = { 
 	/* 000 nul */ 0,
 	/* 001 soh */ 0,
 	/* 002 stx */ 0,
-	/* 003 etx */ 0,
+	/* 003 etx */ ETX,
 	/* 004 eot */ 0,
 	/* 005 enq */ 0,
 	/* 006 ack */ 0,
