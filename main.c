@@ -54,15 +54,19 @@ int main (int argc, const char * argv[])
 {
 	printf("BEGIN\n");
     gSourceTxt = OpenFile("prog");
-    printf("Opened:\n%s\n", gSourceTxt);
+    printf("\nOpened:\n%s\n", gSourceTxt);
     gPointToSourceTxt = gSourceTxt;
-    //lex();
+    
+	
+	printf("\nTokens:\n");
     int x;
-	do {
+	while (1) {
 		x = lex();
-		//*yytext = '\0';
+		if (EOF == x) {
+			break;
+		}
 		printf("Token = %s, value = %d\n", lllexeme, x);
-	} while (x != EOF);
+	} 
 	free(gSourceTxt);
 	printf("\nEND\n");
     return 0;
@@ -74,33 +78,38 @@ int lex(void)
 	yytext = lllexeme;
 	sym1 = *gPointToSourceTxt;
 	while (1) {
-		if (sym1 == '/') {
-			if ((sym2 = NextSym()) == '*')
-				Comment();
-			else
-				PrevSym();
-		}
-		else if (gCharMap[sym1] == LETTER) {
-			*yytext++ = sym1;
-			while ((sym1 = NextSym()) && (gCharMap[sym1] == LETTER || 
-										  gCharMap[sym1] == DIGIT))
+		switch (gCharMap[sym1]) {
+			case LETTER:
 				*yytext++ = sym1;
-			
-			*yytext = '\0';		/* identifier < 32 characters */
-			yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
-			//PrevSym();	/* push back nonalnum char or '_' */
-			return GetLexemeType(lllexeme);
+				while ((sym1 = NextSym()) && (gCharMap[sym1] == LETTER || 
+											  gCharMap[sym1] == DIGIT))
+					*yytext++ = sym1;
+				
+				*yytext = '\0';		/* identifier < 32 characters */
+				yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
+				//PrevSym();	/* push back nonalnum char or '_' */
+				return GetLexemeType(lllexeme);
+				break;
+			case OTHER:
+				if (sym1 == '/') {
+					if ((sym2 = NextSym()) == '*')
+						Comment();
+					else
+						PrevSym();
+				}
+				break;
+			case DIGIT:
+				return get_num();
+				break;
+				
+				
+			default:
+				break;
 		}
-		else if (gCharMap[sym1] == DIGIT)
-			return get_num();
-		
-		
-		//return sym1;
-		//break;
+		sym1 = NextSym();
 		if (sym1 == EOF) {
 			return sym1;
 		}
-		sym1 = NextSym();
 	}
 }
 
