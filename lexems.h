@@ -5,8 +5,15 @@
  * Created on 9 Апрель 2010 г., 1:01
  */
 
+
+#ifndef _LEXEMS_H
+#define    _LEXEMS_H
+
+
+	
 //Лексемы
-enum {
+typedef enum x 
+{
 //	RIGHT_ASSIGN=10,
 //	LEFT_ASSIGN,
 //	ADD_ASSIGN,
@@ -19,29 +26,43 @@ enum {
 //	OR_ASSIGN,
 //	RIGHT_OP,
 //	LEFT_OP,
-	INC_OP = 10,//++
+
+	BREAK=0, 
+	CASE,
+	CONTINUE,
+	DO,
+	ELSE, 
+	FOR,
+	GOTO,
+	IF,
+	INT16,
+	INT32,
+	SWITCH,
+	WHILE,
+	
+	INC_OP,//++
 	DEC_OP,//--
 	AND_OP,//&
 	OR_OP,//||
 	LE_OP,//
 	GE_OP,//>=
 	EQ_OP,//==
-	NE_OP,//<=
+	NE_OP,//!=
 	MUL_OP,//*
 	SUB_OP,//-
-	DIV_OP,// /
+	DIV_OP,// / 
 	ADD_OP,//+
 	MOV_OP,//=
-	END_OP,//;
+	
+	COMM_POINT,//;
+	DOUBLE_POINT,//:
 	IDENTIFIER,
-	KEYWORD,
 	NUMBER
-};
+}Token;
 
-//Ключевые слова
-char *gKeywords[] = { "break", "case", "char", "do", "else", "for",
-	"goto", "if", "int16", "int32", "switch", "while", 0
-};
+
+
+
 
 //Типы символов 
 #define BLANK 1
@@ -182,3 +203,5 @@ static int gCharMap[256] = {
 	/* 176 ~   */ OTHER, 
 };
 
+
+#endif    /* _NEWFILE_H */

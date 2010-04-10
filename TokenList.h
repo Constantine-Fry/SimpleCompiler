@@ -6,14 +6,22 @@
  *  Copyright 2010 Home. All rights reserved.
  *
  */
+#ifndef _TOKENLIST_H
+#define    _TOKENLIST_H
+
+#include "lexems.h"
+
+
 struct node  
 {  
-	 char* value;
-	int ident;
+	void* value;
+	Token  ident;
 	struct node *next;  
 }*Head; 
 
-void Append(int ident,unsigned char *lexeme);
+void Append(Token ident,void *lexeme);
 void Display();
 int Count();
 void Flush();
+
+#endif    /* _TOKENLIST_H */

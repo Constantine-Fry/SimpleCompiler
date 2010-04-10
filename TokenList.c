@@ -11,15 +11,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "IdentifierTable.h"
 
-void Append(int num,unsigned char *lexeme)  
+char *gTokenToDisplay[] = { "break", "case", "continue", "do", "else", "for",
+	"goto", "if", "int16", "int32", "switch", "while",
+	
+	"++","--","&","||","<=",">=","==","!=","*","-","/","+","=",";",":","id","num",0
+};
+
+
+void Append(Token num,void *lexeme)  
 {  
     struct node *temp,*r;  
 	
     temp=(struct node *)malloc(sizeof(struct node));  
     temp->ident = num;
-	temp->value = (char*) malloc(sizeof(lexeme));
-	strcpy(temp->value,(const char*)lexeme);
+	
+	switch (num) {
+		case NUMBER:
+			temp->value = (char*) malloc(sizeof(lexeme));
+			strcpy(temp->value,(const char*)lexeme);
+			break;
+		case IDENTIFIER:
+			temp->value = lexeme;
+			break;	
+		default:
+			break;
+	}
 	//temp->value = lexeme;
 	
     // Copying the Head location into another node.  
@@ -57,7 +75,18 @@ void Display()
 	
     while(cur_ptr!=NULL)  
     {  
-		printf(" <%d,%s> ",cur_ptr->ident,cur_ptr->value);  
+		switch (cur_ptr->ident) {
+			case NUMBER:
+				printf("<%s,%s> ",gTokenToDisplay[(int)cur_ptr->ident],(char*)cur_ptr->value);
+				break;
+			case IDENTIFIER:
+				printf("<%s,%s> ",gTokenToDisplay[(int)cur_ptr->ident],((TypeVal*)cur_ptr->value)->identifier);
+				break;	
+			default:
+				printf("<%s> ",gTokenToDisplay[(int)cur_ptr->ident]);
+				break;
+		}
+		 
 		cur_ptr=cur_ptr->next;  
     }  
     printf("\n");  
@@ -84,7 +113,9 @@ void Flush()
 	while( Head!=NULL)  
 	{  
         temp = Head->next;
-		free(Head->value);
+		if (NUMBER == Head->ident) {
+			free(Head->value);
+		}
         free(Head);  
         Head=temp;  
 	}

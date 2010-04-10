@@ -6,13 +6,16 @@ int GetNumber(unsigned char** num);
 int GetLexemeType(unsigned  char* lexeme);
 void SkipComment(unsigned char** comments);
 int GetCodeOperation(unsigned char** operation);
+int GetString(unsigned char** str);
 int lex(void);
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+//
 #include "lexems.h"
+#include "IdentifierTable.h"
 #include "TokenList.h"
 
 /* char llbuf[BUFSIZ];	*/
@@ -20,6 +23,14 @@ unsigned char lllexeme[LEXSIZ+1];	/* +1 for '\0' */
 unsigned char *yytext;	/* pointer to lllexeme */
 unsigned char* gSourceTxt;
 unsigned char* gPointToSourceTxt;
+
+//Ключевые слова
+char *gKeywords[] = { "break", "case", "continue", "do", "else", "for",
+	"goto", "if", "int16", "int32", "switch", "while", 0
+};
+
+
+void* gResult;
 
 
 unsigned char* OpenFile(char *path){
@@ -60,17 +71,20 @@ int main (int argc, const char * argv[])
     
 	
 	printf("\nTokens:\n");
-    int id;
+    Token id;
 	while (1) {
-		id = lex();
+		id = (Token)lex();
 		if (-1 == id) {
 			break;
 		}
-		Append(id,lllexeme);
-		printf("Token = %s, value = %d\n", lllexeme, id);
+		Append(id,gResult);
+		
+		//printf("value = %s, token = %d\n", (char*)gResult, id);
 	}
 	Display();
+	DisplayIdTable();
 	Flush();
+	FlushIdTable();
 	free(gSourceTxt);
 	printf("\nEND\n");
     return 0;
@@ -78,20 +92,11 @@ int main (int argc, const char * argv[])
 
 int lex(void)
 {
-	//	char sym1, sym2;
 	yytext = lllexeme;
-	//sym1 = *gPointToSourceTxt;
 	while (1) {
 		switch (gCharMap[*gPointToSourceTxt]) {
 			case LETTER:
-				*yytext++ = *gPointToSourceTxt;
-				while (*(++gPointToSourceTxt) && (gCharMap[*gPointToSourceTxt] == LETTER || 
-												  gCharMap[*gPointToSourceTxt] == DIGIT))
-					*yytext++ = *gPointToSourceTxt;
-				
-				*yytext = '\0';		/* identifier < 32 characters */
-				yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
-				return GetLexemeType(lllexeme);
+				return GetString(&gPointToSourceTxt);
 				break;
 				
 			case DIGIT:
@@ -103,22 +108,18 @@ int lex(void)
 				break;
 				
 			case OTHER:
-				*yytext = '\0';
 				if (gPointToSourceTxt[0] == '/' &&
 					gPointToSourceTxt[1] == '*') {
 					SkipComment(&gPointToSourceTxt);
 					break;
 				}
 				return GetCodeOperation(&gPointToSourceTxt);
-				
-				
 				break;
 				
 			default:
 				break;
 		}
 		gPointToSourceTxt++;
-		//sym1 = NextSym();
 	}
 }
 
@@ -140,8 +141,28 @@ void SkipComment(unsigned char** comments)
 	}
 }
 
+int GetString(unsigned char** str)
+{
+	*yytext++ = **str;
+	while (*(++(*str)) && (gCharMap[**str] == LETTER || 
+									  gCharMap[**str] == DIGIT))
+		*yytext++ = **str;
+	
+	*yytext = '\0';		/* identifier < 32 characters */
+	yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
+	
+	Token tok = GetLexemeType(lllexeme);
+	if (IDENTIFIER == tok) {
+		gResult = Lookup((char*)lllexeme,1,tok);
+	}else {
+		gResult = lllexeme;
+	}
+	return tok;
+}
+
 int GetCodeOperation(unsigned char** operation)
 {
+	gResult = NULL;
 	unsigned char *pointToSourceTxt = *operation;
 	if (pointToSourceTxt[0] == '>' &&
 		pointToSourceTxt[1] == '=') {
@@ -203,8 +224,14 @@ int GetCodeOperation(unsigned char** operation)
 	if (pointToSourceTxt[0] == ';') {
 		// ;
 		(*operation)++;
-		return END_OP;
+		return COMM_POINT;
 	}
+	if (pointToSourceTxt[0] == ':') {
+		// ;
+		(*operation)++;
+		return DOUBLE_POINT;
+	}
+	
 	return -2;
 }
 
@@ -213,7 +240,7 @@ int GetLexemeType(unsigned char* lexeme)
 	int i;
 	for (i = 0; gKeywords[i] != '\0'; i++)
 		if (strcmp(gKeywords[i], (const char*)lexeme) == 0)
-			return KEYWORD;
+			return i;//потому что нумерация в массиве gKeywords совпадает с нумерацией Token
 	return IDENTIFIER;
 }
 
@@ -224,5 +251,6 @@ int GetNumber(unsigned char** num)
 	while (gCharMap[ *(++(*num))] == DIGIT)
 		*yytext++ = **num;
 	*yytext = '\0';
+	gResult = lllexeme;
 	return NUMBER;
 }
