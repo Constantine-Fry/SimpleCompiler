@@ -54,10 +54,17 @@ typedef enum x
 	ADD_OP,//+
 	MOV_OP,//=
 	
+	LEFT_BRECKET, //(
+	RIGHT_BRECKET, //)
+	
+	LEFT_FIG_BRECKET, //{
+	RIGHT_FIG_BRECKET, //}
+	
 	COMM_POINT,//;
 	DOUBLE_POINT,//:
 	IDENTIFIER,
-	NUMBER
+	NUMBER,
+	EMPTY,
 }Token;
 
 
@@ -74,7 +81,7 @@ typedef enum x
 
 //Мапа соответсвий символов и их типов
 static int gCharMap[256] = { 
-	/* 000 nul */ 0,
+	/* 000 nul */ ETX,
 	/* 001 soh */ 0,
 	/* 002 stx */ 0,
 	/* 003 etx */ ETX,
