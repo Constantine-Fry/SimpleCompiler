@@ -44,7 +44,9 @@ typedef enum x
 	DEC_OP,//--
 	AND_OP,//&
 	OR_OP,//||
-	LE_OP,//
+	LES_OP,//<
+	GREAT_OP,//>
+	LE_OP,//<=
 	GE_OP,//>=
 	EQ_OP,//==
 	NE_OP,//!=
@@ -53,6 +55,7 @@ typedef enum x
 	DIV_OP,// / 
 	ADD_OP,//+
 	MOV_OP,//=
+	NOT_OP,//!
 	
 	LEFT_BRECKET, //(
 	RIGHT_BRECKET, //)

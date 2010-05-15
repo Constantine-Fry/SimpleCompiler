@@ -5,7 +5,8 @@
 
 //#include "Lex.h"
 // TODO: gresult -> yylval
-// TODO:  добавить в лекс анализатор (,),{,}
+
+// TODO: добавить унарный минус
 
 unsigned char* OpenFile(char *path){
     FILE *source;

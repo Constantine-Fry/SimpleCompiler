@@ -21,9 +21,9 @@ int lex(void)
 		switch (gCharMap[*gPointToSourceTxt]) {
 			case NEWLINE:
 				++line;
-
+				
 				break;
-
+				
 			case LETTER:
 				return GetString(&gPointToSourceTxt);
 				break;
@@ -42,6 +42,24 @@ int lex(void)
 					SkipComment(&gPointToSourceTxt);
 					break;
 				}
+				
+				if (gPointToSourceTxt[0] == '{') {
+					++gPointToSourceTxt;
+					return LEFT_FIG_BRECKET;
+				}
+				if (gPointToSourceTxt[0] == '}') {
+					++gPointToSourceTxt;
+					return RIGHT_FIG_BRECKET;
+				}
+				if (gPointToSourceTxt[0] == '(') {
+					++gPointToSourceTxt;
+					return LEFT_BRECKET;
+				}
+				if (gPointToSourceTxt[0] == ')') {
+					++gPointToSourceTxt;
+					return RIGHT_BRECKET;
+				}
+				
 				return GetCodeOperation(&gPointToSourceTxt);
 				break;
 				
@@ -97,11 +115,13 @@ int GetCodeOperation(unsigned char** operation)
 		pointToSourceTxt[1] == '=') {
 		//>=
 		(*operation)++;
+		(*operation)++;
 		return GE_OP;
 	}
 	if (pointToSourceTxt[0] == '<' &&
 		pointToSourceTxt[1] == '=') {
 		//<=
+		(*operation)++;
 		(*operation)++;
 		return LE_OP;
 	}
@@ -109,11 +129,13 @@ int GetCodeOperation(unsigned char** operation)
 		pointToSourceTxt[1] == '=') {
 		//!=
 		(*operation)++;
+		(*operation)++;
 		return NE_OP;
 	}
 	if (pointToSourceTxt[0] == '+' &&
 		pointToSourceTxt[1] == '+') {
 		//++
+		(*operation)++;
 		(*operation)++;
 		return INC_OP;
 	}
@@ -122,7 +144,26 @@ int GetCodeOperation(unsigned char** operation)
 		pointToSourceTxt[1] == '-') {
 		//--
 		(*operation)++;
+		(*operation)++;
 		return DEC_OP;
+	}
+	if (pointToSourceTxt[0] == '=' &&
+		pointToSourceTxt[1] == '=') {
+		//--
+		(*operation)++;
+		(*operation)++;
+		return EQ_OP;
+	}
+	
+	if (pointToSourceTxt[0] == '<') {
+		// ;
+		(*operation)++;
+		return LE_OP;
+	}
+	if (pointToSourceTxt[0] == '>') {
+		// ;
+		(*operation)++;
+		return GREAT_OP;
 	}
 	
 	if (pointToSourceTxt[0] == '-') {
