@@ -68,6 +68,8 @@ typedef enum x
 	IDENTIFIER,
 	NUMBER,
 	EMPTY,
+	STMTS,
+	STMT
 }Token;
 
 

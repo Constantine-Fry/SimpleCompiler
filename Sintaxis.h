@@ -12,9 +12,16 @@
 
 #include "Lex.h"
 
-void stmt();
-void stmts();
-void expr();
-void mutch(Token tok);
+int stmt();
+int stmts();
+int expr();
+Token mutch(Token tok);
+int boool();
+int term();
+int unary();
+int join();
+int rel();
+int equality();
+
 
 #endif 

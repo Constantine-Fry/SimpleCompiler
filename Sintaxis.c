@@ -8,45 +8,75 @@
  */
 
 #include "Sintaxis.h"
+#include "NodeTable.h"
 
-void stmt()
+
+int stmts(){
+	if (EMPTY == CurrToken) {
+		return AddLeaf(EMPTY, 0);
+		return;
+	}
+	if (RIGHT_FIG_BRECKET == CurrToken) {
+		return;
+	}
+	else {
+		int stmtNode = stmt();
+		int stmtsNode = stmts();
+		return AddNode(STMT, stmtNode, stmtsNode);
+	}
+}
+
+int stmt()
 {
 	switch (CurrToken) {
-		case INT32 :
+		case INT32:
 			mutch(INT32); 
-			mutch(IDENTIFIER);
+			Token tokL = mutch(IDENTIFIER);
+			int idNum = Lookup(gResult, 1, INT32);
+			int nodeL = AddLeaf(tokL, idNum);
 			if(CurrToken == MOV_OP){
-				mutch(MOV_OP); 
-				bool();
+				Token tok = mutch(MOV_OP); 
+				int nodeR = boool();
+				mutch(COMM_POINT);
+				return AddNode(tok, nodeL,nodeR);
 			}
 			mutch(COMM_POINT);
+			int nodeR = AddLeaf(NUMBER, 0);
+			return AddNode(MOV_OP, nodeL, nodeR);
 			break;
 		case INT16:
 			mutch(INT16); 
-			mutch(IDENTIFIER); 
+			Token tokL = mutch(IDENTIFIER);
+			int idNum = Lookup(gResult, 1, INT16);
+			int nodeL = AddLeaf(tokL, idNum);
 			if(CurrToken == MOV_OP){
-				mutch(MOV_OP); 
-				bool();
+				Token tok = mutch(MOV_OP); 
+				int nodeR = boool();
+				mutch(COMM_POINT);
+				return AddNode(tok, nodeL,nodeR);
 			}
 			mutch(COMM_POINT);
+			int nodeR = AddLeaf(NUMBER, 0);
+			return AddNode(MOV_OP, nodeL, nodeR);
 			break;
 			
 		case DO:
-			mutch(DO); 
-			stmt(); 
+			mutch(DO);
+			int nodeL = stmt(); 
 			mutch(WHILE);
 			mutch(LEFT_BRECKET);
-			bool();
+			int nodeR = boool();
 			mutch(RIGHT_BRECKET);
 			mutch(COMM_POINT);
+			return AddNode(DO, nodeL, nodeR);
 			break;
 			
 		case IF:
 			mutch(IF); 
 			mutch(LEFT_BRECKET);
-			bool();
+			int nodeL = boool();
 			mutch(RIGHT_BRECKET);
-			stmt();
+			int nodeR = stmt();
 			if(CurrToken == ELSE){
 				mutch(ELSE);
 				stmt();
@@ -61,10 +91,12 @@ void stmt()
 			break;
 			
 		case IDENTIFIER:
-			mutch(IDENTIFIER);
-			mutch(MOV_OP);
-			bool();
+			Token tok =  mutch(IDENTIFIER);
+			int idNode = AddLeaf(IDENTIFIER, gResult);
+			tok = mutch(MOV_OP);
+			int exprNode = boool();
 			mutch(COMM_POINT);
+			return AddNode(tok, idNode, nodeNum);
 			break;
 
 		default:
@@ -73,20 +105,23 @@ void stmt()
 	}
 }
 
-void expr(){
-	term();
+int expr(){
+	int NodeL = term();
 	switch (CurrToken) {
 		case ADD_OP:
-			mutch(ADD_OP);
-			term();
+			Token tok = mutch(ADD_OP);
+			int nodeR = term();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 		case SUB_OP:
-			mutch(SUB_OP);
-			term();
+			Token tok = mutch(SUB_OP);
+			int nodeR = term();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 		default:
 			break;
 	}
+	return NodeL;
 }
 
 void term(){
@@ -106,18 +141,21 @@ void term(){
 	}
 }
 
-void factor(){
+int factor(){
 	switch (CurrToken) {
 		case NUMBER:
-			mutch(NUMBER);
+			Token tok = mutch(NUMBER);
+			return AddLeaf(tok, gResult);
 			break;
 		case IDENTIFIER:
-			mutch(IDENTIFIER);
+			Token tok = mutch(IDENTIFIER);
+			return AddLeaf(tok, gResult);
 			break;
 		case LEFT_BRECKET:
 			mutch(LEFT_BRECKET);
-			bool();
+			int a = boool();
 			mutch(RIGHT_BRECKET);
+			return a;
 			break;
 		default:
 			//printf("Syntaxes error\n");
@@ -125,23 +163,13 @@ void factor(){
 	}
 }
 
-void stmts(){
-	if (EMPTY == CurrToken) {
-		return;
-	}
-	if (RIGHT_FIG_BRECKET == CurrToken) {
-		return;
-	}
-	else {
-		stmt();
-		stmts();
-	}
-}
 
-void mutch(Token tok)
+Token mutch(Token tok)
 {
+	Token temp = CurrToken;
 	if (CurrToken == tok) {
 		CurrToken = lex();
+		return temp;
 	}
 	else {
 		printf("В строке %d пропущен %s\n", line, (char*)gResult);
@@ -149,89 +177,104 @@ void mutch(Token tok)
 	
 }
 
-void bool(){
-	join();
+int boool(){
+	int nodeL = join();
 	switch (CurrToken) {
 		case OR_OP:
-			mutch(OR_OP);
-			join();
+			Token tok = mutch(OR_OP);
+			int nodeR = join();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 		default:
 			break;
 	}
+	return nodeL;
 }
 
-void join(){
-	equality();
+int join(){
+	int NodeL = equality();
 	switch (CurrToken) {
 		case AND_OP:
-			mutch(AND_OP);
-			equality();
+			Token tok = mutch(AND_OP);
+			int nodeR = equality();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 		default:
 			break;
 	}
+	return NodeL;
 }
 
-void equality(){
-	rel();
+int equality(){
+	int NodeL = rel();
 	switch (CurrToken) {
 		case EQ_OP:
-			mutch(EQ_OP);
-			rel();
+			Token tok = mutch(EQ_OP);
+			int nodeR = rel();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 		case NE_OP:
-			mutch(NE_OP);
-			rel();
+			Token tok = mutch(NE_OP);
+			int nodeR = rel();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 
 		default:
 			break;
 	}
+	return NodeL;
 }
 
-void rel(){
-	expr();
+int rel(){
+	int NodeL = expr();
 	switch (CurrToken) {
 		case LES_OP:
-			mutch(LES_OP);
-			expr();
+			Token tok = mutch(LES_OP);
+			int nodeR = expr();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 			
 		case GREAT_OP:
-			mutch(GREAT_OP);
-			expr();
+			Token tok = mutch(GREAT_OP);
+			int nodeR = expr();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 			
 		case LE_OP:
-			mutch(LE_OP);
-			expr();
+			Token tok = mutch(LE_OP);
+			int nodeR = expr();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 			
 		case GE_OP:
-			mutch(GE_OP);
-			expr();
+			Token tok = mutch(GE_OP);
+			int nodeR = expr();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 
 		default:
 			break;
 	}
+	return NodeL;
 }
 
-void unary(){
-	factor();
+int unary(){
+	int NodeL = factor();
 	switch (CurrToken) {
 		case NOT_OP :
-			mutch(NOT_OP);
-			factor();
+			Token tok = mutch(NOT_OP);
+			int nodeR = factor();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 			
 		case SUB_OP:
-			mutch(SUB_OP);
-			factor();
+			Token tok = mutch(SUB_OP);
+			int nodeR = factor();
+			return AddNode(tok, nodeL, nodeR);
 			break;
 		default:
 			break;
 	}
+	return NodeL;
 }
 

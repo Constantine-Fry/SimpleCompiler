@@ -20,7 +20,7 @@ TypeVal* symtab[NHASH];
 
 int count = 0;
 
-TypeVal* Lookup(char *identifier,int create, Type type)  
+int Lookup(char *identifier,int create, Type type)  
 {  
 
 	int h;
@@ -38,7 +38,7 @@ TypeVal* Lookup(char *identifier,int create, Type type)
 		sym->next = symtab[h];
 		symtab[h] = sym;
 	}
-	return sym;
+	return h;
 } 
 
 unsigned int Hash(char *str){

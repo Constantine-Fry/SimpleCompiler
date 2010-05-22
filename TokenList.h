@@ -12,12 +12,7 @@
 #include "lexems.h"
 
 
-struct node  
-{  
-	void* value;
-	Token  ident;
-	struct node *next;  
-}*Head; 
+
 
 void Append(Token ident,void *lexeme);
 void Display();

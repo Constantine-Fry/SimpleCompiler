@@ -21,7 +21,7 @@ struct TypeVal
 	struct TypeVal *next;  
 }; 
 
-TypeVal* Lookup(char *identifier,int create, Type type);
+int Lookup(char *identifier,int create, Type type);
 void DisplayIdTable();
 int CountIdTable();
 void FlushIdTable();

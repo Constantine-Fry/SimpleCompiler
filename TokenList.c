@@ -13,6 +13,9 @@
 #include <string.h>
 #include "IdentifierTable.h"
 
+
+void flush(struct node* aNode);
+
 char *gTokenToDisplay[] = { "break", "case", "continue", "do", "else", "for",
 	"goto", "if", "int16", "int32", "switch", "while",
 	
@@ -61,64 +64,54 @@ void Append(Token num,void *lexeme)
 
 void Display()  
 {  
-    struct node *cur_ptr;  
-    
-    cur_ptr=Head;      
-	
-    if(cur_ptr==NULL)  
-    {   
-		printf("\nList is Empty");  
-		return;  
-    }
-	
-    //traverse the entire linked list   
-	
-    while(cur_ptr!=NULL)  
-    {  
-		switch (cur_ptr->ident) {
-			case NUMBER:
-				printf("<%s,%s> ",gTokenToDisplay[(int)cur_ptr->ident],(char*)cur_ptr->value);
-				break;
-			case IDENTIFIER:
-				printf("<%s,%s> ",gTokenToDisplay[(int)cur_ptr->ident],((TypeVal*)cur_ptr->value)->identifier);
-				break;	
-			default:
-				printf("<%s> ",gTokenToDisplay[(int)cur_ptr->ident]);
-				break;
-		}
-		 
-		cur_ptr=cur_ptr->next;  
-    }  
-    printf("\n");  
+//    struct node *cur_ptr;  
+//    
+//    cur_ptr=Head;      
+//	
+//    if(cur_ptr==NULL)  
+//    {   
+//		printf("\nList is Empty");  
+//		return;  
+//    }
+//	
+//    //traverse the entire linked list   
+//	
+//    while(cur_ptr!=NULL)  
+//    {  
+//		switch (cur_ptr->ident) {
+//			case NUMBER:
+//				printf("<%s,%s> ",gTokenToDisplay[(int)cur_ptr->ident],(char*)cur_ptr->value);
+//				break;
+//			case IDENTIFIER:
+//				printf("<%s,%s> ",gTokenToDisplay[(int)cur_ptr->ident],((TypeVal*)cur_ptr->value)->identifier);
+//				break;	
+//			default:
+//				printf("<%s> ",gTokenToDisplay[(int)cur_ptr->ident]);
+//				break;
+//		}
+//		 
+//		cur_ptr=cur_ptr->next;  
+//    }  
+//    printf("\n");  
 }  
 
-int Count()  
-{  
-    struct node *cur_ptr;  
-    int c=0;  
-	
-    cur_ptr=Head;  
-	
-    while(cur_ptr!=NULL)  
-    {  
-		cur_ptr=cur_ptr->next;  
-		c++;  
-    }  
-    return(c);  
+
+
+
+void Flush(){
+	flush(Head->left);
+	flush(Head->right);
+	free(Head->value);
+	printf("tree was flush\n");
+	return;
 }
 
-void Flush()
+void flush(struct node* aNode)
 {
-	struct node *temp;  
-	while( Head!=NULL)  
-	{  
-        temp = Head->next;
-		if (NUMBER == Head->ident) {
-			free(Head->value);
-		}
-        free(Head);  
-        Head=temp;  
+	if (NULL != aNode) {
+		flush(aNode->left);
+		flush(aNode->right);
 	}
-	printf("list was flush\n");
+	free(aNode->value);
 }
 
