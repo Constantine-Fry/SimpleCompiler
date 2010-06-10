@@ -8,10 +8,10 @@
  */
 
 #include "Lex.h"
-
+line =1;
 //Ключевые слова
 char *gKeywords[] = { "break", "case", "continue", "do", "else", "for",
-	"goto", "if", "int16", "int32", "switch", "while", 0
+	"goto", "if", "int16", "int32", "switch", "while",0
 };
 
 int lex(void)
@@ -99,11 +99,12 @@ int GetString(unsigned char** str)
 	yytext[LEXSIZ] = '\0';	/* idenfier > 32 characters */
 	
 	Token tok = GetLexemeType(lllexeme);
-	if (IDENTIFIER == tok) {
-		gResult = Lookup((char*)lllexeme,1,tok);
-	}else {
-		gResult = lllexeme;
-	}
+//	if (IDENTIFIER == tok) {
+//		gResult = Lookup((char*)lllexeme,1,tok);
+//	}else {
+//		gResult = lllexeme;
+//	}
+	gResult = lllexeme;
 	return tok;
 }
 
@@ -211,6 +212,8 @@ int GetLexemeType(unsigned char* lexeme)
 	for (i = 0; gKeywords[i] != '\0'; i++)
 		if (strcmp(gKeywords[i], (const char*)lexeme) == 0)
 			return i;//потому что нумерация в массиве gKeywords совпадает с нумерацией Token
+	
+	gResult = lllexeme;
 	return IDENTIFIER;
 }
 

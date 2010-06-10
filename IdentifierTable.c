@@ -26,26 +26,37 @@ int Lookup(char *identifier,int create, Type type)
 	int h;
 	TypeVal *sym;
 	h = Hash(identifier);
-	for(sym = symtab[h];sym != NULL; sym = sym->next)
-		if (strcmp(identifier, sym->identifier) == 0) {
-			return sym;
-		}
+	if (NULL == symtab[h] && !create) {
+
+		return -33;
+	}
+//	for(sym = symtab[h];sym != NULL; sym = sym->next)
+//		if (strcmp(identifier, sym->identifier) == 0) {
+//			return sym;
+//		}
 	if (create) {
 		count++;
 		sym = (TypeVal*)malloc(sizeof(TypeVal));
-		sym->identifier = (char*) malloc(sizeof(identifier));
+		sym->identifier = (char*) malloc(sizeof(char)*strlen(identifier)-1);
+		memset(sym->identifier,0,sizeof(char)*strlen(identifier)-1);
 		strcpy(sym->identifier,(const char*)identifier);
+		sym->type = type;
 		sym->next = symtab[h];
+		sym->isUse = 0;
 		symtab[h] = sym;
 	}
 	return h;
-} 
+}
+
+TypeVal* getStruct(int num){
+	return symtab[num];
+}
 
 unsigned int Hash(char *str){
 	unsigned int h;
 	unsigned char *p;
 	h = 0;
-	for (p = (unsigned char*)str; *p != '\0'; p++) {
+	for (p = str; *p != '\0'; p++) {
 		h = MULTIPLIER * h + *p;
 	}
 	return (h%NHASH);

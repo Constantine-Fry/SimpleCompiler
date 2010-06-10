@@ -18,10 +18,12 @@ struct TypeVal
 {  
 	char* identifier;
 	Type type;
-	struct TypeVal *next;  
+	struct TypeVal *next;
+	int isUse;
 }; 
 
 int Lookup(char *identifier,int create, Type type);
 void DisplayIdTable();
 int CountIdTable();
 void FlushIdTable();
+TypeVal* getStruct(int num);

@@ -8,159 +8,245 @@
  */
 
 #include "Sintaxis.h"
-#include "NodeTable.h"
 
 
-int stmts(){
+void* lexeme;
+
+
+NodeInt stmts(){
 	if (EMPTY == CurrToken) {
+		
 		return AddLeaf(EMPTY, 0);
-		return;
 	}
 	if (RIGHT_FIG_BRECKET == CurrToken) {
-		return;
+		return 1;
 	}
 	else {
-		int stmtNode = stmt();
-		int stmtsNode = stmts();
-		return AddNode(STMT, stmtNode, stmtsNode);
+		NodeInt stmtNode = stmt();
+		if (stmtNode == 0) {
+			return 0;
+		}
+		NodeInt stmtsNode = stmts();
+		return AddNode(STMTS, stmtNode, 0,stmtsNode);
 	}
 }
 
-int stmt()
+NodeInt stmt()
 {
 	switch (CurrToken) {
-		case INT32:
+		case INT32:{
 			mutch(INT32); 
 			Token tokL = mutch(IDENTIFIER);
-			int idNum = Lookup(gResult, 1, INT32);
-			int nodeL = AddLeaf(tokL, idNum);
+			int idNum = Lookup(lexeme, 1, INT32);
+			NodeInt nodeL = AddLeaf(tokL, idNum);
 			if(CurrToken == MOV_OP){
 				Token tok = mutch(MOV_OP); 
-				int nodeR = boool();
-				mutch(COMM_POINT);
-				return AddNode(tok, nodeL,nodeR);
+				NodeInt nodeR = boool();
+
+					mutch(COMM_POINT);
+
+				return AddNode(tok, nodeL,0,nodeR);
 			}
 			mutch(COMM_POINT);
-			int nodeR = AddLeaf(NUMBER, 0);
-			return AddNode(MOV_OP, nodeL, nodeR);
+			NodeInt nodeR = AddLeaf(NUMBER, 0);
+			return AddNode(MOV_OP, nodeL, 0,nodeR);
 			break;
-		case INT16:
+		}
+		case INT16:{
 			mutch(INT16); 
 			Token tokL = mutch(IDENTIFIER);
-			int idNum = Lookup(gResult, 1, INT16);
-			int nodeL = AddLeaf(tokL, idNum);
+			int idNum = Lookup(lexeme, 1, INT16);
+			NodeInt nodeL = AddLeaf(tokL, idNum);
 			if(CurrToken == MOV_OP){
 				Token tok = mutch(MOV_OP); 
-				int nodeR = boool();
+				NodeInt nodeR = boool();
 				mutch(COMM_POINT);
-				return AddNode(tok, nodeL,nodeR);
+				return AddNode(tok, nodeL,0,nodeR);
 			}
 			mutch(COMM_POINT);
-			int nodeR = AddLeaf(NUMBER, 0);
-			return AddNode(MOV_OP, nodeL, nodeR);
+			NodeInt nodeR = AddLeaf(NUMBER, 0);
+			return AddNode(MOV_OP, nodeL, 0,nodeR);
 			break;
+		}
 			
-		case DO:
+		case DO:{
 			mutch(DO);
-			int nodeL = stmt(); 
+			NodeInt nodeL = stmt(); 
 			mutch(WHILE);
 			mutch(LEFT_BRECKET);
-			int nodeR = boool();
+			NodeInt nodeR = boool();
 			mutch(RIGHT_BRECKET);
 			mutch(COMM_POINT);
-			return AddNode(DO, nodeL, nodeR);
+			return AddNode(DO, nodeL, 0,nodeR);
 			break;
+		}
 			
-		case IF:
-			mutch(IF); 
+		case IF:{
+			Token tok = mutch(IF); 
 			mutch(LEFT_BRECKET);
-			int nodeL = boool();
+			NodeInt nodeL = boool();
 			mutch(RIGHT_BRECKET);
-			int nodeR = stmt();
+			NodeInt nodeR = stmt();
+			NodeInt nodeM = 0;
 			if(CurrToken == ELSE){
-				mutch(ELSE);
-				stmt();
+				tok = mutch(ELSE);
+				nodeM = stmt();
 			}
-			mutch(COMM_POINT);
+			return AddNode(tok, nodeL, nodeM, nodeR);
 			break;
+		}
 			
-		case LEFT_FIG_BRECKET:
+		case LEFT_FIG_BRECKET:{
 			mutch(LEFT_FIG_BRECKET);
-			stmts();
+			NodeInt node = stmts();
 			mutch(RIGHT_FIG_BRECKET);
+			return AddNode(STMT, node, 0, 0);
 			break;
+		}
 			
-		case IDENTIFIER:
+		case IDENTIFIER:{
 			Token tok =  mutch(IDENTIFIER);
-			int idNode = AddLeaf(IDENTIFIER, gResult);
-			tok = mutch(MOV_OP);
-			int exprNode = boool();
-			mutch(COMM_POINT);
-			return AddNode(tok, idNode, nodeNum);
-			break;
 
+			
+			if(CurrToken == MOV_OP){
+				int idNum = Lookup(lexeme,0,0);
+				if (idNum < 0){
+					printf("Syntax error:В строке %d использована не объявленая переменная \n",line);
+					return 0;
+				}
+				NodeInt idLeaf = AddLeaf(IDENTIFIER, idNum);
+				
+				tok = mutch(MOV_OP);
+				NodeInt nodeR = boool();
+				mutch(COMM_POINT);
+				return AddNode(tok, idLeaf, 0,nodeR);
+			}
+			if(CurrToken == LEFT_BRECKET){
+				int idNum = Lookup(lexeme,1,0);
+				if (idNum < 0){
+					printf("Syntax error:В строке %d использована не объявленая переменная \n",line);
+					return 0;
+				}
+				NodeInt idLeaf = AddLeaf(IDENTIFIER, idNum);
+				
+				mutch(LEFT_BRECKET);
+				NodeInt nodeR =boool();
+				mutch(RIGHT_BRECKET);
+				mutch(COMM_POINT);
+				return AddNode(FUNCTION, idLeaf, 0, nodeR);
+			}
+			break;
+		}
+			
+		case CONTINUE:{
+			return AddNode(CONTINUE, 0, 0, 0);
+		}
+			
+		case BREAK:{
+			return AddNode(BREAK, 0, 0, 0);
+		}
+			
+			
 		default:
 			printf("Syntaxes error\n");
+			return 0;
 			break;
 	}
 }
 
-int expr(){
-	int NodeL = term();
+NodeInt expr(){
+	NodeInt nodeL = term();
 	switch (CurrToken) {
-		case ADD_OP:
+		case ADD_OP:{
 			Token tok = mutch(ADD_OP);
-			int nodeR = term();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = expr();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
-		case SUB_OP:
+		}
+		case SUB_OP:{
 			Token tok = mutch(SUB_OP);
-			int nodeR = term();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = expr();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
 		default:
 			break;
 	}
-	return NodeL;
+	return nodeL;
 }
 
-void term(){
-	unary();
+NodeInt term(){
+	NodeInt nodeL = unary();
 	switch (CurrToken) {
-		case MUL_OP:
-			mutch(MUL_OP);
-			unary();
+		case MUL_OP:{
+			Token tok = mutch(MUL_OP);
+			NodeInt nodeR = term();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
-		case DIV_OP:
-			mutch(DIV_OP);
-			unary();
+		}
+		case DIV_OP:{
+			Token tok = mutch(DIV_OP);
+			NodeInt nodeR = term();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
-			
+		}
 		default:
 			break;
 	}
+	return nodeL;
 }
 
-int factor(){
+NodeInt factor(){
 	switch (CurrToken) {
-		case NUMBER:
+		case NUMBER:{
 			Token tok = mutch(NUMBER);
-			return AddLeaf(tok, gResult);
+			return AddLeaf(tok, atoi(lexeme));
 			break;
-		case IDENTIFIER:
-			Token tok = mutch(IDENTIFIER);
-			return AddLeaf(tok, gResult);
+		}
+		case IDENTIFIER:{
+			mutch(IDENTIFIER);
+			if(CurrToken == LEFT_BRECKET){
+				int idNum = Lookup(lexeme,1,0);
+				if (idNum < 0){
+					printf("Syntax error:В строке %d использована не объявленая переменная \n",line);
+					return 0;
+				}
+				NodeInt idLeaf = AddLeaf(IDENTIFIER, idNum);
+				
+				//mutch(LEFT_BRECKET);
+				NodeInt nodeR =boool();
+				//mutch(RIGHT_BRECKET);
+
+				return AddNode(FUNCTION, idLeaf, 0, nodeR);
+			}else {
+				int idNum = Lookup(lexeme,0,0);
+				if (idNum < 0){
+					printf("Syntax error:В строке %d использована не объявленая переменная \n",line);
+					return 0;
+				}
+				return AddLeaf(IDENTIFIER, idNum);
+			}
+
 			break;
-		case LEFT_BRECKET:
+		}
+
+
+		case LEFT_BRECKET:{
 			mutch(LEFT_BRECKET);
-			int a = boool();
+			if (RIGHT_BRECKET == CurrToken) {
+				mutch(RIGHT_BRECKET);
+				return	AddLeaf(EMPTY, 0);
+			}
+			NodeInt a = boool();
 			mutch(RIGHT_BRECKET);
 			return a;
 			break;
+		}
 		default:
 			//printf("Syntaxes error\n");
 			break;
 	}
+	return -1;
 }
 
 
@@ -168,113 +254,122 @@ Token mutch(Token tok)
 {
 	Token temp = CurrToken;
 	if (CurrToken == tok) {
+		lexeme = gResult;
 		CurrToken = lex();
 		return temp;
 	}
-	else {
-		printf("В строке %d пропущен %s\n", line, (char*)gResult);
-	}
 	
+	printf("Syntax error: В строке %d пропущен %s\n", line, (char*)lexeme);
+	return -1;
 }
 
-int boool(){
-	int nodeL = join();
+NodeInt boool(){
+	NodeInt nodeL = join();
 	switch (CurrToken) {
-		case OR_OP:
+		case OR_OP:{
 			Token tok = mutch(OR_OP);
-			int nodeR = join();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = join();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
 		default:
 			break;
 	}
 	return nodeL;
 }
 
-int join(){
-	int NodeL = equality();
+NodeInt join(){
+	int nodeL = equality();
 	switch (CurrToken) {
-		case AND_OP:
+		case AND_OP:{
 			Token tok = mutch(AND_OP);
-			int nodeR = equality();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = equality();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
 		default:
 			break;
 	}
-	return NodeL;
+	return nodeL;
 }
 
-int equality(){
-	int NodeL = rel();
+NodeInt equality(){
+	NodeInt nodeL = rel();
 	switch (CurrToken) {
-		case EQ_OP:
+		case EQ_OP:{
 			Token tok = mutch(EQ_OP);
-			int nodeR = rel();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = rel();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
-		case NE_OP:
+		}
+		case NE_OP:{
 			Token tok = mutch(NE_OP);
-			int nodeR = rel();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = rel();
+			return AddNode(tok, nodeL,0, nodeR);
 			break;
-
+		}
 		default:
 			break;
 	}
-	return NodeL;
+	return nodeL;
 }
 
-int rel(){
-	int NodeL = expr();
+NodeInt rel(){
+	NodeInt nodeL = expr();
 	switch (CurrToken) {
-		case LES_OP:
+		case LES_OP:{
 			Token tok = mutch(LES_OP);
-			int nodeR = expr();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = expr();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
 			
-		case GREAT_OP:
+		case GREAT_OP:{
 			Token tok = mutch(GREAT_OP);
-			int nodeR = expr();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = expr();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
 			
-		case LE_OP:
+		case LE_OP:{
 			Token tok = mutch(LE_OP);
-			int nodeR = expr();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = expr();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
 			
-		case GE_OP:
+		case GE_OP:{
 			Token tok = mutch(GE_OP);
-			int nodeR = expr();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = expr();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
-
+		}
 		default:
 			break;
 	}
-	return NodeL;
+	return nodeL;
 }
 
-int unary(){
-	int NodeL = factor();
+NodeInt unary(){
+	NodeInt nodeL = factor();
 	switch (CurrToken) {
-		case NOT_OP :
+		case NOT_OP :{
 			Token tok = mutch(NOT_OP);
-			int nodeR = factor();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = factor();
+			return AddNode(tok, nodeL,0, nodeR);
 			break;
+		}
 			
-		case SUB_OP:
+		case SUB_OP:{
 			Token tok = mutch(SUB_OP);
-			int nodeR = factor();
-			return AddNode(tok, nodeL, nodeR);
+			NodeInt nodeR = factor();
+			return AddNode(tok, nodeL, 0,nodeR);
 			break;
+		}
+			
 		default:
 			break;
 	}
-	return NodeL;
+	return nodeL;
 }
 

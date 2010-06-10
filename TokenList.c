@@ -17,11 +17,11 @@
 void flush(struct node* aNode);
 
 char *gTokenToDisplay[] = { "break", "case", "continue", "do", "else", "for",
-	"goto", "if", "int16", "int32", "switch", "while",
+	"goto", "if", "int16", "int32", "switch", "while", "write","read",
 	
 	"++","--","&","||","<=",">=","==","!=","*","-","/","+","=",";",":","id","num",0
 };
-
+/*
 
 void Append(Token num,void *lexeme)  
 {  
@@ -61,7 +61,7 @@ void Append(Token num,void *lexeme)
 		r->next =temp;    
     }  
 } 
-
+*/
 void Display()  
 {  
 //    struct node *cur_ptr;  
@@ -96,7 +96,7 @@ void Display()
 }  
 
 
-
+/*
 
 void Flush(){
 	flush(Head->left);
@@ -114,4 +114,4 @@ void flush(struct node* aNode)
 	}
 	free(aNode->value);
 }
-
+*/

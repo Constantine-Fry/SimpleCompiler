@@ -40,6 +40,7 @@ typedef enum x
 	SWITCH,
 	WHILE,
 	
+	
 	INC_OP,//++
 	DEC_OP,//--
 	AND_OP,//&
@@ -69,7 +70,8 @@ typedef enum x
 	NUMBER,
 	EMPTY,
 	STMTS,
-	STMT
+	STMT,
+	FUNCTION
 }Token;
 
 

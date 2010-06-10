@@ -11,17 +11,18 @@
 #define    _SIN_H
 
 #include "Lex.h"
+#include "NodeTable.h"
 
-int stmt();
-int stmts();
-int expr();
+NodeInt stmt();
+NodeInt stmts();
+NodeInt expr();
 Token mutch(Token tok);
-int boool();
-int term();
-int unary();
-int join();
-int rel();
-int equality();
+NodeInt boool();
+NodeInt term();
+NodeInt unary();
+NodeInt join();
+NodeInt rel();
+NodeInt equality();
 
 
 #endif 

@@ -37,30 +37,42 @@ unsigned char* OpenFile(char *path){
     return gBuffer;
 }
 
+void SaveToFile(char *filename){
+	FILE*  shfd = fopen(filename,"w");
+	if (shfd < 0) {
+		perror("open");
+		return;
+	}
+	SaveCode(shfd);
+	fclose(shfd);
+}
+
 int main (int argc, const char * argv[]) 
 {
 	printf("BEGIN\n");
     gSourceTxt = OpenFile("prog");
     printf("\nOpened:\n%s\n", gSourceTxt);
     gPointToSourceTxt = gSourceTxt;
-    
-	line = 1;
 	
-	printf("\nTokens:\n");
-    
 	CurrToken = (Token)lex();
-	//while (1) {
-		stmts();
-//		if (EMPTY == CurrToken) {
-//			break;
-//		}
-		//Append(id,gResult);
-		
-		//printf("value = %s, token = %d\n", (char*)gResult, id);
-	//}
-	Display();
+	int root = stmts();
+	if (root  != 0 ) {
+		printf("\nTokens:\n");
+		printNodes(root);
+		printf("\nCode:\n");
+		int a = gen(root, 0);
+		if(a == 0){
+			LogCode();
+			SaveToFile("output.asm");
+		}
+	}
+	system("nasm -f macho  output.asm");
+	system("nasm -f macho  lib.asm");
+	system("rm output");
+	system("ld -o output output.o lib.o -arch i386");
+	//system("./output");
+	printf("\n");
 	DisplayIdTable();
-	Flush();
 	FlushIdTable();
 	free(gSourceTxt);
 	printf("\nEND\n");
