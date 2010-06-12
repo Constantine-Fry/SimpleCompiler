@@ -1,3 +1,4 @@
-int32 a = 2+4;
-int32 qw = a + 2 + 10 + (a + 1);
+int32 a = 2;
+int32 qw = 2+1;
+qw = qw*2+10*(1+a);
 write(qw);
