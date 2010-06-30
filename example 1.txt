@@ -1,0 +1,15 @@
+GLOBAL _start
+SEGMENT .text
+	
+_start: 
+	mov [a],5
+	mov ax,[a]
+	add ax, 2
+	mov [b],ax
+        mov EAX,1
+	int 80H
+
+SEGMENT .data
+a DW 0
+b DW 0
+
