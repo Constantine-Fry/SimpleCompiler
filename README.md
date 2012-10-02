@@ -1,12 +1,12 @@
 #Primitive Compiler written in pure C.
 
-Lexical analyzer.
+* Lexical analyzer.
 
-Parser (Parser was developed in C.)
+* Parser (Parser was developed in C.)
 
-Hashtable
+* Hashtable
 
-Stack
+* Stack
 
 
 For hashtable I used this hash function:
